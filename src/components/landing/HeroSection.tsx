@@ -6,12 +6,14 @@ export type HeroPolygonProps = {
 function HeroPolygon({ children }: HeroPolygonProps) {
   return (
     <div
-      className="relative min-h-[60vh] bg-gradient-to-br from-cyan-700 via-teal-500 to-emerald-400"
+      className="relative min-h-[60vh] bg-[url(./public/imagenHero.jpg)] bg-cover "
       style={{
         clipPath: "polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%)",
       }}
     >
-      {children}
+      <div className="absolute inset-0 bg-gradient-to-br from-cyan-700/70 via-teal-500/70 to-emerald-400/80 bg-opacity-40"></div>
+
+      <div className="relative z-10">{children}</div>
     </div>
   );
 }
