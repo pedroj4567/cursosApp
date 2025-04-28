@@ -74,7 +74,7 @@ const CategorySection = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % specialties.length);
-    }, 3000); // Cambia cada 3 segundos
+    }, 3000);
     return () => clearInterval(interval);
   }, [specialties.length]);
 
@@ -90,7 +90,6 @@ const CategorySection = () => {
           </p>
         </div>
 
-        {/* Carrusel automático */}
         <div className="relative h-70 overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
@@ -144,20 +143,6 @@ const CategorySection = () => {
               </div>
             </motion.div>
           </AnimatePresence>
-        </div>
-
-        {/* Indicadores */}
-        <div className="flex justify-center mt-6 space-x-2">
-          {specialties.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(index)}
-              className={`w-2 h-2 rounded-full ${
-                currentIndex === index ? "bg-cyan-600" : "bg-gray-300"
-              }`}
-              aria-label={`Ir a especialidad ${index + 1}`}
-            />
-          ))}
         </div>
       </div>
     </section>
