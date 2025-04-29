@@ -1,3 +1,5 @@
+import { Link } from "react-scroll";
+
 const LandingNav = () => {
   return (
     <nav className="relative z-20 px-6 py-6 lg:px-12 flex justify-between items-center">
@@ -8,21 +10,27 @@ const LandingNav = () => {
             Inicio
           </a>
         </li>
-        <li>
-          <a href="#" className="text-white hover:text-cyan-200 transition">
-            Programas
-          </a>
-        </li>
-        <li>
-          <a href="#" className="text-white hover:text-cyan-200 transition">
-            Profesores
-          </a>
-        </li>
-        <li>
-          <a href="#" className="text-white hover:text-cyan-200 transition">
-            Contacto
-          </a>
-        </li>
+        <Link
+          to="contentCourseSection"
+          smooth={true}
+          className="text-white hover:text-cyan-200 transition"
+        >
+          Programas
+        </Link>
+        <Link
+          to="aboutProjectSection"
+          smooth={true}
+          className="text-white hover:text-cyan-200 transition"
+        >
+          Proyecto
+        </Link>
+        <Link
+          to="categorySection"
+          smooth={true}
+          className="text-white hover:text-cyan-200 transition"
+        >
+          Categorias
+        </Link>
       </ul>
       <button className="md:hidden text-white">
         <svg

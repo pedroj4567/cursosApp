@@ -1,4 +1,4 @@
-import FeatureItem from "./FeatureItem";
+import FeatureItem from "./heroElements/FeatureItem";
 
 const AboutProjectSection = () => {
   return (
@@ -71,7 +71,7 @@ const AboutProjectSection = () => {
                     <ul className="mt-3 space-y-2 text-sm text-gray-600">
                       <li className="flex items-center">
                         <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 mr-2"></span>
-                        Carreras universitarias
+                        Tecnologias, arquitecturas, etc..
                       </li>
                       <li className="flex items-center">
                         <span className="w-1.5 h-1.5 rounded-full bg-teal-500 mr-2"></span>

@@ -5,6 +5,7 @@ import Footer from "../../components/landing/Footer";
 import HeroContent from "../../components/landing/HeroContent";
 import HeroSection from "../../components/landing/HeroSection";
 import LandingNav from "../../components/landing/LandingNav";
+import { Element } from "react-scroll";
 
 const LandingPage = () => {
   return (
@@ -16,10 +17,16 @@ const LandingPage = () => {
           description="Cursos especializados en tecnología con enfoque práctico y moderno"
         />
       </HeroSection>
+      <Element name="contentCourseSection">
+        <ContentCourseSection />
+      </Element>
+      <Element name="aboutProjectSection">
+        <AboutProjectSection />
+      </Element>
+      <Element name="categorySection">
+        <CategorySection />
+      </Element>
 
-      <ContentCourseSection />
-      <AboutProjectSection />
-      <CategorySection />
       <Footer />
     </main>
   );

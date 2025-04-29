@@ -1,4 +1,4 @@
-import HeroButtons from "./HeroButtons";
+import HeroButtons from "../landing/buttons/HeroButtons";
 
 export type HeroContentProps = {
   title: string;
