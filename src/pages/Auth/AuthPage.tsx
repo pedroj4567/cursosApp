@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "flowbite-react";
+import { useNavigate } from "react-router-dom";
 
 const AuthPage = () => {
   const [authMode, setAuthMode] = useState("login"); // 'login', 'register', 'forgot'
@@ -18,7 +19,11 @@ const AuthPage = () => {
       setIsAnimating(false);
     }, 300);
   };
+  const navigator = useNavigate();
 
+  const handlerClickNavigator = (path: string) => {
+    navigator(path);
+  };
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
       {/* Lado izquierdo - Imagen */}
@@ -185,6 +190,9 @@ const AuthPage = () => {
                 <Button
                   type="submit"
                   className="w-full py-2 bg-teal-500 sm:py-3 text-xs sm:text-sm md:text-base border cursor-pointer hover:bg-teal-600 transition-colors"
+                  onClick={() => {
+                    handlerClickNavigator("/courses/home");
+                  }}
                 >
                   Ingresar
                 </Button>
@@ -265,6 +273,9 @@ const AuthPage = () => {
                 <Button
                   type="submit"
                   className="w-full py-2 sm:py-3 text-xs sm:text-sm md:text-base"
+                  onClick={() => {
+                    handlerClickNavigator("/courses/home");
+                  }}
                 >
                   Registrarse
                 </Button>
@@ -291,6 +302,9 @@ const AuthPage = () => {
                 <Button
                   type="submit"
                   className="w-full py-2 sm:py-3 text-xs sm:text-sm md:text-base"
+                  onClick={() => {
+                    handlerClickNavigator("/courses/home");
+                  }}
                 >
                   Enviar instrucciones
                 </Button>
