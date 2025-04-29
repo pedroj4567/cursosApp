@@ -75,7 +75,7 @@ const AuthPage = () => {
                     : "Recupera tu acceso rápidamente"}
                 </p>
 
-                <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm md:text-base text-cyan-50">
+                <ul className="space-y-1 sm:hidden sm:space-y-2 text-xs sm:text-sm md:text-base text-cyan-50">
                   {authMode === "login" ? (
                     <>
                       <li className="flex items-start">
@@ -198,7 +198,7 @@ const AuthPage = () => {
                   type="submit"
                   className="w-full py-2 bg-teal-500 sm:py-3 text-xs sm:text-sm md:text-base border cursor-pointer hover:bg-teal-600 transition-colors"
                   onClick={() => {
-                    handlerClickNavigator("/courses/home");
+                    handlerClickNavigator("/courses");
                   }}
                 >
                   Ingresar
