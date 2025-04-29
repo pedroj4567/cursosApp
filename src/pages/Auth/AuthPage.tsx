@@ -24,6 +24,10 @@ const AuthPage = () => {
   const handlerClickNavigator = (path: string) => {
     navigator(path);
   };
+
+  const handlerSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  };
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
       {/* Lado izquierdo - Imagen */}
@@ -144,7 +148,10 @@ const AuthPage = () => {
 
             {/* Formulario de Login */}
             {authMode === "login" && (
-              <form className="space-y-3 sm:space-y-4 md:space-y-6">
+              <form
+                className="space-y-3 sm:space-y-4 md:space-y-6"
+                onSubmit={handlerSubmit}
+              >
                 <div>
                   <label className="block text-xs sm:text-sm md:text-base text-gray-700 mb-1 sm:mb-2 font-medium">
                     Correo electrónico

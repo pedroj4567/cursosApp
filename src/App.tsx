@@ -14,8 +14,8 @@ function App() {
           <Route index element={<AuthPage />} />
         </Route>
 
-        <Route path="/courses" element={<CoursesLayout />}>
-          <Route index path="/courses/home" element={<HomeCoursesPage />} />
+        <Route element={<CoursesLayout />}>
+          <Route index path="/courses" element={<HomeCoursesPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
