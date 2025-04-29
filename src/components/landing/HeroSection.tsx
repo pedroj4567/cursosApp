@@ -6,7 +6,7 @@ export type HeroPolygonProps = {
 function HeroPolygon({ children }: HeroPolygonProps) {
   return (
     <div
-      className={`relative min-h-[60vh] bg-[url(./public/imagenHero.webp)] bg-cover `}
+      className={`relative min-h-[60vh] bg-[url(/imagenHero.webp)] bg-cover `}
       style={{
         clipPath: "polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%)",
       }}
