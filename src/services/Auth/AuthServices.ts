@@ -5,9 +5,6 @@ import { LoginRequest, SingUpRequest } from "./types";
 const authServices = {
   async login({ email, password }: LoginRequest) {
     try {
-      console.log("Debug", email);
-      console.log("Debug", password);
-
       const response = await axios.post("/auth/local", {
         identifier: email,
         password,

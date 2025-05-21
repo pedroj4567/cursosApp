@@ -1,5 +1,11 @@
 import { Route, BrowserRouter, Routes } from "react-router-dom";
-import { AuthPage, LandingPage, MyCoursesPage } from "./pages";
+import {
+  AuthPage,
+  CourseDetailsPage,
+  LandingPage,
+  MyCoursesPage,
+  SearchCoursesPage,
+} from "./pages";
 import AuthLayout from "./layouts/AuthLayout";
 import CoursesLayout from "./layouts/CoursesLayout";
 import HomeCoursesPage from "./pages/Courses/HomeCoursesPage";
@@ -25,7 +31,9 @@ function App() {
             }
           >
             <Route index path="/courses" element={<HomeCoursesPage />} />
-            <Route index path="/my-courses" element={<MyCoursesPage />} />
+            <Route path="/my-courses" element={<MyCoursesPage />} />
+            <Route path="/search" element={<SearchCoursesPage />} />
+            <Route path="/course/:id" element={<CourseDetailsPage />} />
           </Route>
         </Routes>
       </AuthProvider>
