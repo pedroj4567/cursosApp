@@ -2,6 +2,7 @@ import { Route, BrowserRouter, Routes } from "react-router-dom";
 import {
   AuthPage,
   CourseDetailsPage,
+  CoursePlayerPage,
   LandingPage,
   MyCoursesPage,
   SearchCoursesPage,
@@ -11,6 +12,7 @@ import CoursesLayout from "./layouts/CoursesLayout";
 import HomeCoursesPage from "./pages/Courses/HomeCoursesPage";
 import { ProtectedRoute } from "./contexts/AuthContext";
 import { AuthProvider } from "./contexts/AuthContext"; // Importa el AuthProvider
+import { CoursePlayLayout } from "./layouts/CoursePlayLayout";
 
 function App() {
   return (
@@ -34,6 +36,22 @@ function App() {
             <Route path="/my-courses" element={<MyCoursesPage />} />
             <Route path="/search" element={<SearchCoursesPage />} />
             <Route path="/course/:id" element={<CourseDetailsPage />} />
+          </Route>
+        </Routes>
+
+        <Routes>
+          <Route
+            element={
+              <ProtectedRoute>
+                <CoursePlayLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route
+              index
+              path="/course/video/:id"
+              element={<CoursePlayerPage />}
+            />
           </Route>
         </Routes>
       </AuthProvider>
