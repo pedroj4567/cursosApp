@@ -135,4 +135,103 @@ export const courseServices = {
       throw error; // Puedes manejar el error donde llames a este método
     }
   },
+
+  async getCourseByDocumentId(uuid: string): Promise<Course> {
+    try {
+      const token = localStorage.getItem("jwt");
+
+      if (!token) {
+        throw new Error("No se encontró el token de autenticación");
+      }
+
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      const response = await axiosInstance.get(
+        `/courses?populate[0]=category&populate[1]=chapters&filters[documentId][$eq]=${uuid}`,
+        {
+          headers: headers,
+        }
+      );
+
+      if (response.status !== 200 || !response.data.data.length) {
+        throw new Error("Curso no encontrado");
+      }
+
+      return fromJsonToCourse(response.data.data[0]);
+    } catch (error) {
+      console.error("Error en courseServices.getCourseByDocumentId:", error);
+      throw error;
+    }
+  },
+
+  async getUserInSession() {
+    const user = localStorage.getItem("user");
+
+    if (user) {
+      const userParsed = JSON.parse(user);
+
+      const data = await axiosInstance.get(
+        `/users/${userParsed.id}?populate=*`
+      );
+      return data.data;
+    }
+  },
+
+  async addCourseToUserByDocumentId(documentId: string) {
+    try {
+      const token = localStorage.getItem("jwt");
+      const user = localStorage.getItem("user");
+
+      if (!token || !user) {
+        throw new Error("No se encontró el token de autenticación o usuario");
+      }
+
+      const userParsed = JSON.parse(user);
+
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      // Obtener el curso por documentId para conseguir su ID interno
+      const courseResponse = await axiosInstance.get(
+        `/courses?filters[documentId][$eq]=${documentId}`,
+        { headers }
+      );
+
+      if (!courseResponse.data.data || courseResponse.data.data.length === 0) {
+        throw new Error("Curso no encontrado");
+      }
+
+      const courseId = courseResponse.data.data[0].id;
+
+      // Actualizar usuario conectando el curso por ID interno
+      const response = await axiosInstance.put(
+        `/users/${userParsed.id}`,
+        {
+          cursos: {
+            connect: [courseId],
+          },
+        },
+        {
+          headers,
+        }
+      );
+
+      if (response.status !== 200) {
+        throw new Error("Error al asociar el curso al usuario");
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Error en courseServices.addCourseToUserByDocumentId:",
+        error
+      );
+      throw error;
+    }
+  },
 };

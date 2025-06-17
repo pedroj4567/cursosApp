@@ -7,11 +7,11 @@ import { Course } from "./types";
 
 const CourseDetailsPage = () => {
   const navigate = useNavigate();
-  const { getCourseByUUID } = courseServices;
+  const { getCourseByUUID, getUserInSession, addCourseToUserByDocumentId } =
+    courseServices;
   const { id } = useParams();
   const [course, setCourse] = useState<Course | null>(null);
-
-  console.log(course);
+  const [loadingEnroll, setLoadingEnroll] = useState(false);
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -19,6 +19,8 @@ const CourseDetailsPage = () => {
 
       try {
         const courseData = await getCourseByUUID({ uuid: id });
+        const user = await getUserInSession();
+        console.log("Usuario en sesión:", user);
         setCourse(courseData);
       } catch (error) {
         console.error("Error al obtener el curso:", error);
@@ -26,7 +28,22 @@ const CourseDetailsPage = () => {
     };
 
     fetchCourse();
-  }, [id, getCourseByUUID]);
+  }, [id, getCourseByUUID, getUserInSession]);
+
+  const handleEnroll = async () => {
+    if (!course) return;
+
+    try {
+      setLoadingEnroll(true);
+      await addCourseToUserByDocumentId(course.documentId);
+      alert("Inscripción exitosa al curso.");
+    } catch (error) {
+      console.error("Error al inscribirse al curso:", error);
+      alert("No se pudo inscribir al curso. Intenta nuevamente.");
+    } finally {
+      setLoadingEnroll(false);
+    }
+  };
 
   if (!course) {
     return (
@@ -143,12 +160,11 @@ const CourseDetailsPage = () => {
 
             <div className="bg-white p-6 rounded-lg shadow-md">
               <Button
+                disabled={loadingEnroll}
                 className="w-full bg-teal-600 hover:bg-teal-700 transition-colors"
-                onClick={() => {
-                  // Lógica para inscribirse al curso
-                }}
+                onClick={handleEnroll}
               >
-                Inscribirse al curso
+                {loadingEnroll ? "Inscribiendo..." : "Inscribirse al curso"}
               </Button>
 
               <Button

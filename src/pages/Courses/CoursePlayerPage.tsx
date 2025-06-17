@@ -6,42 +6,131 @@ import {
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "flowbite-react";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { courseServices } from "../../services/Courses";
+
+interface Chapter {
+  id: number;
+  documentId: string;
+  title: string;
+  description: string;
+  duration: number;
+  videoUrl: string;
+  orden: number;
+  createdAt: string;
+  updatedAt: string;
+  completed?: boolean;
+  resources?: Array<{ name: string; type: string }>;
+}
+
+interface Category {
+  name: string;
+}
+
+interface Course {
+  id: number;
+  uuid: string;
+  title: string;
+  description: string;
+  duration: string;
+  hours: number;
+  lessons: string;
+  profesor: string;
+  imageUrl: string;
+  categories: Category[];
+  chapters: Chapter[];
+  progress?: number;
+}
 
 const CoursePlayerPage = () => {
   const [activeChapter, setActiveChapter] = useState(0);
+  const [course, setCourse] = useState<Course | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { id } = useParams<{ id: string }>();
 
-  // Datos de ejemplo - reemplaza con tus datos reales
-  const course = {
-    title: "Introducción a React Avanzado",
-    description:
-      "Aprende hooks avanzados, context API y patrones de diseño en React",
-    instructor: "María García",
-    thumbnail: "/images/react-course.jpg",
-    progress: 65,
-    chapters: [
-      {
-        id: 1,
-        title: "Introducción al curso",
-        duration: "15 min",
-        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", // URL completa del embed
-        completed: true,
-        resources: [
-          { name: "Guía de instalación.pdf", type: "pdf" },
-          { name: "Código inicial.zip", type: "zip" },
-        ],
-      },
-      {
-        id: 2,
-        title: "Configuración del entorno",
-        duration: "22 min",
-        videoUrl: "https://www.youtube.com/embed/c3THPu57CZM",
-        completed: true,
-        resources: [],
-      },
-    ],
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        if (!id) {
+          throw new Error("No se proporcionó ID del curso");
+        }
+
+        const courseData = await courseServices.getCourseByDocumentId(id);
+        console.log("Datos del curso:", courseData);
+
+        // Añadir propiedades adicionales si no vienen de la API
+        const enrichedCourse = {
+          ...courseData,
+          progress: courseData.progress || 0,
+          chapters: courseData.chapters.map((chapter) => ({
+            ...chapter,
+            completed: chapter.completed || false,
+            resources: chapter.resources || [],
+          })),
+        };
+
+        setCourse(enrichedCourse);
+      } catch (err) {
+        console.error("Error al cargar el curso:", err);
+        setError(err instanceof Error ? err.message : "Error desconocido");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourse();
+  }, [id]);
+
+  const convertToEmbedUrl = (url: string) => {
+    if (!url) return "";
+    if (url.includes("embed")) return url;
+
+    const regExp =
+      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+
+    return match && match[2].length === 11
+      ? `https://www.youtube.com/embed/${match[2]}`
+      : url;
   };
+
+  if (loading) {
+    return (
+      <main className="bg-white min-h-screen pt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-center items-center h-64">
+            <p>Cargando curso...</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="bg-white min-h-screen pt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-center items-center h-64">
+            <p className="text-red-500">{error}</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!course) {
+    return (
+      <main className="bg-white min-h-screen pt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-center items-center h-64">
+            <p>No se encontró el curso</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="bg-white min-h-screen pt-20">
@@ -74,14 +163,18 @@ const CoursePlayerPage = () => {
           <div className="lg:w-2/3">
             {/* Reproductor de video */}
             <div className="bg-black rounded-lg overflow-hidden aspect-video mb-6 shadow-md">
-              <iframe
-                className="w-full h-full"
-                src={course.chapters[activeChapter].videoUrl}
-                title={`Video: ${course.chapters[activeChapter].title}`}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
+              {course.chapters[activeChapter]?.videoUrl && (
+                <iframe
+                  className="w-full h-full"
+                  src={convertToEmbedUrl(
+                    course.chapters[activeChapter].videoUrl
+                  )}
+                  title={`Video: ${course.chapters[activeChapter].title}`}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              )}
             </div>
 
             {/* Información del capítulo actual */}
@@ -91,41 +184,28 @@ const CoursePlayerPage = () => {
                   {course.chapters[activeChapter].title}
                 </h2>
                 <span className="text-sm bg-cyan-100 text-cyan-800 px-3 py-1 rounded-full">
-                  {course.chapters[activeChapter].duration}
+                  {course.chapters[activeChapter].duration} hora
+                  {course.chapters[activeChapter].duration !== 1 ? "s" : ""}
                 </span>
               </div>
 
               <div className="prose max-w-none text-gray-600">
                 <p>
-                  Este capítulo cubre los conceptos fundamentales necesarios
-                  para comenzar con el curso.
+                  {course.chapters[activeChapter].description ||
+                    "Este capítulo no tiene descripción."}
                 </p>
-                <ul className="mt-4 space-y-2">
-                  <li className="flex items-start">
-                    <CheckCircleIcon className="h-5 w-5 text-cyan-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Introducción a los temas principales</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircleIcon className="h-5 w-5 text-cyan-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Requisitos previos</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircleIcon className="h-5 w-5 text-cyan-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Configuración inicial</span>
-                  </li>
-                </ul>
               </div>
             </div>
 
             {/* Recursos del capítulo */}
-            {course.chapters[activeChapter].resources.length > 0 && (
+            {course.chapters[activeChapter].resources?.length > 0 && (
               <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                   <DocumentTextIcon className="h-5 w-5 text-cyan-600 mr-2" />
                   Recursos del capítulo
                 </h3>
                 <ul className="space-y-3">
-                  {course.chapters[activeChapter].resources.map(
+                  {course.chapters[activeChapter].resources?.map(
                     (resource, index) => (
                       <li
                         key={index}
@@ -168,46 +248,49 @@ const CoursePlayerPage = () => {
                 </div>
               </div>
 
-              <ul className="divide-y divide-gray-200">
-                {course.chapters.map((chapter, index) => (
-                  <li key={chapter.id}>
-                    <button
-                      onClick={() => setActiveChapter(index)}
-                      className={`w-full px-6 py-4 text-left flex items-center justify-between ${
-                        activeChapter === index
-                          ? "bg-cyan-50"
-                          : "hover:bg-gray-50"
-                      }`}
-                    >
-                      <div className="flex items-center">
-                        {chapter.completed ? (
-                          <CheckCircleIcon className="h-5 w-5 text-green-500 mr-3" />
-                        ) : (
-                          <PlayIcon className="h-5 w-5 text-gray-400 mr-3" />
-                        )}
-                        <div>
-                          <p
-                            className={`text-sm font-medium ${
-                              activeChapter === index
-                                ? "text-cyan-700"
-                                : "text-gray-700"
-                            }`}
-                          >
-                            {chapter.title}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {chapter.duration}
-                          </p>
+              <ul className="divide-y divide-gray-200 max-h-[500px] overflow-y-auto">
+                {course.chapters
+                  .sort((a, b) => a.orden - b.orden)
+                  .map((chapter, index) => (
+                    <li key={chapter.id}>
+                      <button
+                        onClick={() => setActiveChapter(index)}
+                        className={`w-full px-6 py-4 text-left flex items-center justify-between ${
+                          activeChapter === index
+                            ? "bg-cyan-50"
+                            : "hover:bg-gray-50"
+                        }`}
+                      >
+                        <div className="flex items-center">
+                          {chapter.completed ? (
+                            <CheckCircleIcon className="h-5 w-5 text-green-500 mr-3" />
+                          ) : (
+                            <PlayIcon className="h-5 w-5 text-gray-400 mr-3" />
+                          )}
+                          <div>
+                            <p
+                              className={`text-sm font-medium ${
+                                activeChapter === index
+                                  ? "text-cyan-700"
+                                  : "text-gray-700"
+                              }`}
+                            >
+                              {chapter.title}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {chapter.duration} hora
+                              {chapter.duration !== 1 ? "s" : ""}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                      {activeChapter === index && (
-                        <span className="bg-cyan-100 text-cyan-800 text-xs px-2 py-1 rounded-full">
-                          Reproduciendo
-                        </span>
-                      )}
-                    </button>
-                  </li>
-                ))}
+                        {activeChapter === index && (
+                          <span className="bg-cyan-100 text-cyan-800 text-xs px-2 py-1 rounded-full">
+                            Reproduciendo
+                          </span>
+                        )}
+                      </button>
+                    </li>
+                  ))}
               </ul>
             </div>
 
@@ -219,19 +302,18 @@ const CoursePlayerPage = () => {
               <div className="flex items-start">
                 <div className="flex-shrink-0">
                   <div className="h-12 w-12 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600 font-medium">
-                    MG
+                    {course.profesor
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
                   </div>
                 </div>
                 <div className="ml-4">
                   <h4 className="text-sm font-bold text-gray-900">
-                    {course.instructor}
+                    {course.profesor}
                   </h4>
                   <p className="text-sm text-gray-500 mt-1">
-                    Ingeniera Frontend con 8 años de experiencia
-                  </p>
-                  <p className="text-sm text-gray-600 mt-2">
-                    Especializada en React, TypeScript y arquitectura de
-                    aplicaciones escalables.
+                    Instructor del curso
                   </p>
                 </div>
               </div>
