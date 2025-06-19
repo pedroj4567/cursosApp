@@ -13,6 +13,7 @@ import HomeCoursesPage from "./pages/Courses/HomeCoursesPage";
 import { ProtectedRoute } from "./contexts/AuthContext";
 import { AuthProvider } from "./contexts/AuthContext"; // Importa el AuthProvider
 import { CoursePlayLayout } from "./layouts/CoursePlayLayout";
+import QuizPage from "./pages/Courses/QuizPage";
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
               path="/course/video/:id"
               element={<CoursePlayerPage />}
             />
+            <Route index path="/course/quiz/:id" element={<QuizPage />} />
           </Route>
         </Routes>
       </AuthProvider>

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import CourseCard from "../../components/Courses/CourseCard";
 import { Link } from "react-router-dom";
-import { Course } from "./types";
+import { Course, StrapiCourseResponse, fromJsonToCourse } from "./types";
 import { Spinner } from "flowbite-react";
 import {
   ArrowRightIcon,
@@ -10,12 +10,14 @@ import {
   ClockIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
+import { courseServices } from "../../services/Courses";
 
 const MyCoursesPage = () => {
   const { user } = useAuth();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { getUserInSession } = courseServices;
 
   useEffect(() => {
     const fetchUserCourses = async () => {
@@ -23,9 +25,13 @@ const MyCoursesPage = () => {
         setLoading(true);
         // TODO: Reemplazar con tu llamada API real
         // const response = await api.get(`/users/${user?.id}/courses`);
-
-        // Mock data - reemplaza con tu data real
-        setTimeout(() => setCourses([]), 800); // Simula carga
+        const user = await getUserInSession();
+        const jsonCourses = user?.courses.map(
+          (course: StrapiCourseResponse) => {
+            return fromJsonToCourse(course);
+          }
+        );
+        setCourses(jsonCourses);
       } catch (err) {
         setError("No se pudieron cargar tus cursos. Intenta recargar.");
         console.error("Error fetching courses:", err);

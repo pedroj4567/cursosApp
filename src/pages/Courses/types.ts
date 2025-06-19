@@ -1,4 +1,5 @@
 export type Chapter = {
+  [x: string]: boolean;
   id: number;
   documentId: string;
   title: string;
@@ -40,6 +41,7 @@ export interface StrapiCourseResponse {
 }
 
 export type Course = {
+  [x: string]: number;
   uuid: string;
   id: number;
   title: string;
@@ -53,6 +55,7 @@ export type Course = {
   categories: Array<{ name: string }>;
   hours: number;
   chapters: Chapter[];
+  courses: Course[];
 };
 
 export function fromJsonToCourse(json: StrapiCourseResponse): Course {

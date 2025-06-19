@@ -180,58 +180,49 @@ export const courseServices = {
     }
   },
 
-  async addCourseToUserByDocumentId(documentId: string) {
+  // Agrega esto a tu courseServices.ts
+  async enrollToCourse(courseId: string | number): Promise<boolean> {
     try {
       const token = localStorage.getItem("jwt");
       const user = localStorage.getItem("user");
 
       if (!token || !user) {
-        throw new Error("No se encontró el token de autenticación o usuario");
+        throw new Error("Usuario no autenticado");
       }
 
       const userParsed = JSON.parse(user);
-
       const headers = {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       };
 
-      // Obtener el curso por documentId para conseguir su ID interno
-      const courseResponse = await axiosInstance.get(
-        `/courses?filters[documentId][$eq]=${documentId}`,
+      // 1. Primero obtenemos los cursos actuales del usuario
+      const currentUser = await axiosInstance.get(
+        `/users/${userParsed.id}?populate[courses][fields][0]=id`,
         { headers }
       );
 
-      if (!courseResponse.data.data || courseResponse.data.data.length === 0) {
-        throw new Error("Curso no encontrado");
+      const currentCourses =
+        currentUser.data.courses?.map((c: any) => c.id) || [];
+
+      // 2. Si el curso ya está asignado, retornamos true
+      if (currentCourses.includes(courseId)) {
+        return true;
       }
 
-      const courseId = courseResponse.data.data[0].id;
-
-      // Actualizar usuario conectando el curso por ID interno
-      const response = await axiosInstance.put(
+      // 3. Actualizamos el usuario con el nuevo curso
+      await axiosInstance.put(
         `/users/${userParsed.id}`,
         {
-          cursos: {
-            connect: [courseId],
-          },
+          courses: [...currentCourses, courseId],
         },
-        {
-          headers,
-        }
+        { headers }
       );
 
-      if (response.status !== 200) {
-        throw new Error("Error al asociar el curso al usuario");
-      }
-
-      return response.data;
+      return true;
     } catch (error) {
-      console.error(
-        "Error en courseServices.addCourseToUserByDocumentId:",
-        error
-      );
-      throw error;
+      console.error("Error en enrollToCourse:", error);
+      throw new Error("No se pudo completar la inscripción");
     }
   },
 };

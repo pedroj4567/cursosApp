@@ -1,47 +1,65 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "flowbite-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { courseServices } from "../../services/Courses";
 import { Spinner } from "flowbite-react";
 import { Course } from "./types";
+import { HiArrowRight, HiCheck } from "react-icons/hi";
 
 const CourseDetailsPage = () => {
   const navigate = useNavigate();
-  const { getCourseByUUID, getUserInSession, addCourseToUserByDocumentId } =
-    courseServices;
+  const { getCourseByUUID, getUserInSession, enrollToCourse } = courseServices;
   const { id } = useParams();
   const [course, setCourse] = useState<Course | null>(null);
   const [loadingEnroll, setLoadingEnroll] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [navigating, setNavigating] = useState(false);
 
   useEffect(() => {
-    const fetchCourse = async () => {
+    const fetchCourseAndUser = async () => {
       if (!id) return;
 
       try {
         const courseData = await getCourseByUUID({ uuid: id });
-        const user = await getUserInSession();
-        console.log("Usuario en sesión:", user);
+        const userData = await getUserInSession();
+
         setCourse(courseData);
+        setUser(userData);
+
+        // Verificar si el usuario ya está inscrito
+        if (userData?.courses?.some((c: any) => c.id === courseData.id)) {
+          setIsEnrolled(true);
+        }
       } catch (error) {
-        console.error("Error al obtener el curso:", error);
+        console.error("Error al obtener datos:", error);
       }
     };
 
-    fetchCourse();
+    fetchCourseAndUser();
   }, [id, getCourseByUUID, getUserInSession]);
 
   const handleEnroll = async () => {
-    if (!course) return;
+    if (!course || !user) return;
 
     try {
       setLoadingEnroll(true);
-      await addCourseToUserByDocumentId(course.documentId);
-      alert("Inscripción exitosa al curso.");
+      await enrollToCourse(course.id);
+      setIsEnrolled(true);
+      alert("¡Inscripción exitosa al curso!");
     } catch (error) {
-      console.error("Error al inscribirse al curso:", error);
-      alert("No se pudo inscribir al curso. Intenta nuevamente.");
+      console.error("Error al inscribirse:", error);
+      alert(error instanceof Error ? error.message : "Error al inscribirse");
     } finally {
       setLoadingEnroll(false);
+    }
+  };
+  console.log(course);
+  const handleGoToCourse = () => {
+    if (course) {
+      setNavigating(true);
+      navigate(`/course/video/${course.uuid}`);
     }
   };
 
@@ -158,20 +176,42 @@ const CourseDetailsPage = () => {
               </p>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <Button
-                disabled={loadingEnroll}
-                className="w-full bg-teal-600 hover:bg-teal-700 transition-colors"
-                onClick={handleEnroll}
-              >
-                {loadingEnroll ? "Inscribiendo..." : "Inscribirse al curso"}
-              </Button>
+            <div className="bg-white p-6 rounded-lg shadow-md space-y-3">
+              {isEnrolled ? (
+                <>
+                  <Button
+                    className="w-full bg-green-600 hover:bg-green-700 transition-colors"
+                    onClick={handleGoToCourse}
+                    disabled={navigating}
+                  >
+                    <HiArrowRight className="mr-2" />
+                    {navigating ? "Cargando..." : "Ir al curso"}
+                  </Button>
+                  <Button
+                    className="w-full bg-teal-100 text-teal-800 hover:bg-teal-200 transition-colors"
+                    disabled
+                  >
+                    <HiCheck className="mr-2" />
+                    Ya estás inscrito
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  disabled={loadingEnroll || !user}
+                  className="w-full bg-teal-600 hover:bg-teal-700 transition-colors"
+                  onClick={handleEnroll}
+                >
+                  {loadingEnroll
+                    ? "Inscribiendo..."
+                    : user
+                    ? "Inscribirse al curso"
+                    : "Inicia sesión para inscribirte"}
+                </Button>
+              )}
 
               <Button
-                className="w-full mt-3 bg-white text-teal-600 border border-teal-600 hover:bg-teal-50 transition-colors"
-                onClick={() => {
-                  navigate(-1);
-                }}
+                className="w-full bg-white text-teal-600 border border-teal-600 hover:bg-teal-50 transition-colors"
+                onClick={() => navigate(-1)}
               >
                 Volver a los cursos
               </Button>

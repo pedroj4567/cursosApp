@@ -7,7 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Button } from "flowbite-react";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { courseServices } from "../../services/Courses";
 
 interface Chapter {
@@ -49,6 +49,7 @@ const CoursePlayerPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { id } = useParams<{ id: string }>();
+  const navigator = useNavigate();
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -58,7 +59,6 @@ const CoursePlayerPage = () => {
         }
 
         const courseData = await courseServices.getCourseByDocumentId(id);
-        console.log("Datos del curso:", courseData);
 
         // Añadir propiedades adicionales si no vienen de la API
         const enrichedCourse = {
@@ -82,6 +82,11 @@ const CoursePlayerPage = () => {
 
     fetchCourse();
   }, [id]);
+  console.log(course);
+  if (!course?.chapters.length) {
+    navigator(`/course/${id}`);
+    return;
+  }
 
   const convertToEmbedUrl = (url: string) => {
     if (!url) return "";
@@ -147,6 +152,7 @@ const CoursePlayerPage = () => {
                 Mis Cursos
               </Link>
             </li>
+
             <li>
               <div className="flex items-center">
                 <ChevronRightIcon className="h-4 w-4 text-gray-400" />
@@ -328,7 +334,12 @@ const CoursePlayerPage = () => {
                     Prueba tus nuevas habilidades
                   </p>
                   <div>
-                    <Button className="border text-teal-800 mx-auto px-4 py-1">
+                    <Button
+                      className="border text-teal-800 mx-auto px-4 py-1"
+                      onClick={() => {
+                        navigator(`/course/quiz/${id}`);
+                      }}
+                    >
                       Hacer Quiz
                     </Button>
                   </div>
