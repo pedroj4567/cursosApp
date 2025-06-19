@@ -119,7 +119,7 @@ export const courseServices = {
       };
 
       const response = await axiosInstance.get(
-        `/courses?populate[0]=category&populate[1]=chapters&filters[documentId][$eq]=${uuid}`,
+        `/courses?populate=*&filters[documentId][$eq]=${uuid}`,
         {
           headers: headers,
         }
@@ -150,7 +150,7 @@ export const courseServices = {
       };
 
       const response = await axiosInstance.get(
-        `/courses?populate[0]=category&populate[1]=chapters&filters[documentId][$eq]=${uuid}`,
+        `/courses?populate[0]=category&populate[1]=chapters&populate[2]=quizzes&filters[documentId][$eq]=${uuid}`,
         {
           headers: headers,
         }

@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button, Spinner, Alert } from "flowbite-react";
 import { HiArrowLeft, HiCheck, HiX, HiSparkles } from "react-icons/hi";
 import axios from "axios";
+import { courseServices } from "../../services/Courses";
 
 interface Quiz {
   id: number;
@@ -258,11 +259,12 @@ const QuizPage = () => {
         setLoading(true);
         if (!courseId) throw new Error("No se proporcionó ID del curso");
 
-        const courseData = await mockCourseService.getCourseByUUID({
+        const courseData = await courseServices.getCourseByUUID({
           uuid: courseId,
         });
+        console.log(courseData);
 
-        if (!courseData.quizzes || courseData.quizzes.length === 0) {
+        if (!courseData.quizzes || !courseData.quizzes.length) {
           throw new Error("Este curso no tiene quizzes disponibles");
         }
 

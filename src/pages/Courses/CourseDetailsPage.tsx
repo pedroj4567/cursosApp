@@ -55,7 +55,7 @@ const CourseDetailsPage = () => {
       setLoadingEnroll(false);
     }
   };
-  console.log(course);
+
   const handleGoToCourse = () => {
     if (course) {
       setNavigating(true);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type Chapter = {
   [x: string]: boolean;
   id: number;
@@ -38,10 +39,10 @@ export interface StrapiCourseResponse {
   updatedAt: string;
   category: Category[];
   chapters: Chapter[];
+  quizzes: any[];
 }
 
 export type Course = {
-  [x: string]: number;
   uuid: string;
   id: number;
   title: string;
@@ -56,6 +57,7 @@ export type Course = {
   hours: number;
   chapters: Chapter[];
   courses: Course[];
+  quizzes: any[];
 };
 
 export function fromJsonToCourse(json: StrapiCourseResponse): Course {
@@ -76,5 +78,6 @@ export function fromJsonToCourse(json: StrapiCourseResponse): Course {
       })) ?? [],
     hours: json.totalHours || 0,
     chapters: json.chapters || [],
+    quizzes: json.quizzes || [],
   };
 }
