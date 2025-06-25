@@ -14,6 +14,7 @@ import { ProtectedRoute } from "./contexts/AuthContext";
 import { AuthProvider } from "./contexts/AuthContext"; // Importa el AuthProvider
 import { CoursePlayLayout } from "./layouts/CoursePlayLayout";
 import QuizPage from "./pages/Courses/QuizPage";
+import AdminReportPage from "./pages/report/AdminReportPage";
 
 function App() {
   return (
@@ -54,6 +55,8 @@ function App() {
               element={<CoursePlayerPage />}
             />
             <Route index path="/course/quiz/:id" element={<QuizPage />} />
+
+            <Route index path="/reports" element={<AdminReportPage />} />
           </Route>
         </Routes>
       </AuthProvider>

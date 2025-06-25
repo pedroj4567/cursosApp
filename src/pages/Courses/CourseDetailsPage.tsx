@@ -24,6 +24,7 @@ const CourseDetailsPage = () => {
       try {
         const courseData = await getCourseByUUID({ uuid: id });
         const userData = await getUserInSession();
+        console.log(userData);
 
         setCourse(courseData);
         setUser(userData);
