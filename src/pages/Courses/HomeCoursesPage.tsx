@@ -26,7 +26,7 @@ const HomeCoursesPage = () => {
 
         <div className="my-5 flex justify-center">
           <Button
-            className="bg-teal-600  hover:bg-teal-700 transition-colors px-10 py-2 cursor-pointer"
+            className="bg-blue-600  hover:bg-teal-700 transition-colors px-10 py-2 cursor-pointer"
             onClick={() => {
               navigate("/search");
             }}

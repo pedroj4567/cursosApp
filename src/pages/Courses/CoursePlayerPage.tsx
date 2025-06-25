@@ -146,7 +146,7 @@ const CoursePlayerPage = () => {
             <li className="inline-flex items-center">
               <Link
                 to="/courses"
-                className="text-sm text-cyan-600 hover:text-cyan-800 inline-flex items-center"
+                className="text-sm text-blue-600 hover:text-blue-800 inline-flex items-center"
               >
                 <BookOpenIcon className="h-4 w-4 mr-2" />
                 Mis Cursos
@@ -189,7 +189,7 @@ const CoursePlayerPage = () => {
                 <h2 className="text-xl font-bold text-gray-900">
                   {course.chapters[activeChapter].title}
                 </h2>
-                <span className="text-sm bg-cyan-100 text-cyan-800 px-3 py-1 rounded-full">
+                <span className="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
                   {course.chapters[activeChapter].duration} hora
                   {course.chapters[activeChapter].duration !== 1 ? "s" : ""}
                 </span>
@@ -207,7 +207,7 @@ const CoursePlayerPage = () => {
             {course.chapters[activeChapter].resources?.length > 0 && (
               <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <DocumentTextIcon className="h-5 w-5 text-cyan-600 mr-2" />
+                  <DocumentTextIcon className="h-5 w-5 text-blue-600 mr-2" />
                   Recursos del capítulo
                 </h3>
                 <ul className="space-y-3">
@@ -223,7 +223,7 @@ const CoursePlayerPage = () => {
                             {resource.name}
                           </span>
                         </div>
-                        <button className="text-sm text-cyan-600 hover:text-cyan-800 font-medium">
+                        <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
                           Descargar
                         </button>
                       </li>
@@ -247,7 +247,7 @@ const CoursePlayerPage = () => {
                   </span>
                   <div className="ml-2 w-full bg-gray-200 rounded-full h-2">
                     <div
-                      className="bg-cyan-600 h-2 rounded-full"
+                      className="bg-blue-600 h-2 rounded-full"
                       style={{ width: `${course.progress}%` }}
                     ></div>
                   </div>
@@ -263,7 +263,7 @@ const CoursePlayerPage = () => {
                         onClick={() => setActiveChapter(index)}
                         className={`w-full px-6 py-4 text-left flex items-center justify-between ${
                           activeChapter === index
-                            ? "bg-cyan-50"
+                            ? "bg-blue-50"
                             : "hover:bg-gray-50"
                         }`}
                       >
@@ -277,7 +277,7 @@ const CoursePlayerPage = () => {
                             <p
                               className={`text-sm font-medium ${
                                 activeChapter === index
-                                  ? "text-cyan-700"
+                                  ? "text-blue-700"
                                   : "text-gray-700"
                               }`}
                             >
@@ -290,7 +290,7 @@ const CoursePlayerPage = () => {
                           </div>
                         </div>
                         {activeChapter === index && (
-                          <span className="bg-cyan-100 text-cyan-800 text-xs px-2 py-1 rounded-full">
+                          <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
                             Reproduciendo
                           </span>
                         )}
@@ -307,7 +307,7 @@ const CoursePlayerPage = () => {
               </h3>
               <div className="flex items-start">
                 <div className="flex-shrink-0">
-                  <div className="h-12 w-12 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600 font-medium">
+                  <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium">
                     {course.profesor
                       .split(" ")
                       .map((n) => n[0])
@@ -335,7 +335,7 @@ const CoursePlayerPage = () => {
                   </p>
                   <div>
                     <Button
-                      className="border text-teal-800 mx-auto px-4 py-1"
+                      className="border text-blue-800 mx-auto px-4 py-1"
                       onClick={() => {
                         navigator(`/course/quiz/${id}`);
                       }}

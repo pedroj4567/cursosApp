@@ -7,7 +7,7 @@ export type NavLinks = {
 export const routes: NavLinks[] = [
   {
     id: 1,
-    label: "Home",
+    label: "Inicio",
     path: "/courses",
   },
   {

@@ -77,9 +77,18 @@ const CourseDetailsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 relative overflow-hidden">
+      {/* Logo UNERG como marca de agua */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-10">
+        <img
+          src="https://images.seeklogo.com/logo-png/26/2/unerg-logo-png_seeklogo-265623.png"
+          alt="UNERG Logo"
+          className="max-w-xs md:max-w-sm"
+        />
+      </div>
+
       {/* Banner del curso */}
-      <div className="w-full h-64 md:h-80 overflow-hidden">
+      <div className="w-full h-64 md:h-80 overflow-hidden relative z-10">
         <img
           src={course.imageUrl}
           alt={course.title}
@@ -87,7 +96,7 @@ const CourseDetailsPage = () => {
         />
       </div>
 
-      <section className="container mx-auto p-6">
+      <section className="container mx-auto p-6 relative z-10">
         <div className="flex flex-col md:flex-row gap-8">
           {/* Contenido principal */}
           <div className="flex-1">
@@ -99,15 +108,17 @@ const CourseDetailsPage = () => {
               {course.categories?.map((cat, index) => (
                 <span
                   key={index}
-                  className="px-3 py-1 bg-teal-100 text-teal-800 rounded-full text-sm"
+                  className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
                 >
                   {cat.name}
                 </span>
               ))}
-              <span className="text-teal-600 font-semibold">
+              <span className="text-blue-600 font-semibold">
                 Horas: {course.hours}
               </span>
-              <span className="text-gray-600">{course.lessons} lecciones</span>
+              <span className="text-gray-600 font-bold">
+                {course.lessons} lecciones
+              </span>
             </div>
 
             <h2 className="text-xl font-semibold text-gray-800 mb-2">
@@ -180,7 +191,7 @@ const CourseDetailsPage = () => {
               {isEnrolled ? (
                 <>
                   <Button
-                    className="w-full bg-green-600 hover:bg-green-700 transition-colors"
+                    className="w-full bg-blue-600 hover:bg-blue-700 transition-colors"
                     onClick={handleGoToCourse}
                     disabled={navigating}
                   >
@@ -188,7 +199,7 @@ const CourseDetailsPage = () => {
                     {navigating ? "Cargando..." : "Ir al curso"}
                   </Button>
                   <Button
-                    className="w-full bg-teal-100 text-teal-800 hover:bg-teal-200 transition-colors"
+                    className="w-full bg-blue-100 text-teal-800 hover:bg-blue-200 transition-colors"
                     disabled
                   >
                     <HiCheck className="mr-2" />
@@ -198,7 +209,7 @@ const CourseDetailsPage = () => {
               ) : (
                 <Button
                   disabled={loadingEnroll || !user}
-                  className="w-full bg-teal-600 hover:bg-teal-700 transition-colors"
+                  className="w-full bg-blue-600 hover:bg-blue-700 transition-colors"
                   onClick={handleEnroll}
                 >
                   {loadingEnroll
@@ -210,7 +221,7 @@ const CourseDetailsPage = () => {
               )}
 
               <Button
-                className="w-full bg-white text-teal-600 border border-teal-600 hover:bg-teal-50 transition-colors"
+                className="w-full bg-white text-blue-600 border border-blue-600 hover:bg-blue-50 transition-colors"
                 onClick={() => navigate(-1)}
               >
                 Volver a los cursos

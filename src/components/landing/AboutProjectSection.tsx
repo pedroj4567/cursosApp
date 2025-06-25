@@ -11,7 +11,7 @@ const AboutProjectSection = () => {
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-cyan-800 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-black-800 mb-4">
             Plataforma Especializada en Contenido Universitario
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">

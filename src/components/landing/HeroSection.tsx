@@ -11,7 +11,7 @@ function HeroPolygon({ children }: HeroPolygonProps) {
         clipPath: "polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%)",
       }}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-cyan-700/70 via-teal-500/70 to-emerald-400/80 bg-opacity-40"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-700/70 via-gray-500/70 to-gray-400/80 bg-opacity-40"></div>
 
       <div className="relative z-10">{children}</div>
     </div>

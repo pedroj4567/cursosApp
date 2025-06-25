@@ -2,7 +2,7 @@ const ContentCourseSection = () => {
   return (
     <section className="bg-white w-full pt-24 pb-24 ">
       <div className="container mx-auto px-6">
-        <h2 className="text-3xl font-bold text-center text-cyan-800 mb-12">
+        <h2 className="text-3xl font-bold text-center  mb-12">
           Nuestros Programas Destacados
         </h2>
         <div className="grid md:grid-cols-3 gap-8">

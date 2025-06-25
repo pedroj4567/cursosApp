@@ -6,28 +6,28 @@ const LandingNav = () => {
       <div className="text-2xl font-bold text-white">FrostAcademy</div>
       <ul className="hidden md:flex space-x-8">
         <li>
-          <a href="#" className="text-white hover:text-cyan-200 transition">
+          <a href="#" className="text-white hover:text-blue-400 transition">
             Inicio
           </a>
         </li>
         <Link
           to="contentCourseSection"
           smooth={true}
-          className="text-white hover:text-cyan-200 transition"
+          className="text-white hover:text-blue-400 transition"
         >
           Programas
         </Link>
         <Link
           to="aboutProjectSection"
           smooth={true}
-          className="text-white hover:text-cyan-200 transition"
+          className="text-white hover:text-blue-400 transition"
         >
           Proyecto
         </Link>
         <Link
           to="categorySection"
           smooth={true}
-          className="text-white hover:text-cyan-200 transition"
+          className="text-white hover:text-blue-400 transition"
         >
           Categorias
         </Link>

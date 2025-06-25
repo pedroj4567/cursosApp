@@ -82,10 +82,10 @@ const CategorySection = () => {
     <section className="py-12  w-full mb-20">
       <div className="mx-auto px-6 max-w-7xl">
         <div className="text-center mb-10">
-          <h2 className="text-2xl md:text-3xl font-bold text-teal-600 mb-2">
+          <h2 className="text-2xl md:text-3xl font-bold text-black mb-2">
             Especialidades en Ingeniería de Sistemas
           </h2>
-          <p className="text-gray-600">
+          <p className="text-black">
             Enfoques profesionales para formar los ingenieros del futuro
           </p>
         </div>

@@ -141,7 +141,7 @@ export const LoginForm = ({ onModeChange }: LoginFormProps) => {
         <button
           type="button"
           onClick={() => onModeChange("forgot")}
-          className="text-xs sm:text-sm text-cyan-600 hover:underline"
+          className="text-xs sm:text-sm text-blue-600 hover:underline"
         >
           ¿Olvidaste tu contraseña?
         </button>
@@ -149,7 +149,7 @@ export const LoginForm = ({ onModeChange }: LoginFormProps) => {
 
       <Button
         type="submit"
-        className="w-full py-2 bg-teal-500 hover:bg-teal-600 text-white"
+        className="w-full py-2 bg-blue-500 hover:bg-blue-600 text-white"
         disabled={isLoading}
       >
         {isLoading ? (

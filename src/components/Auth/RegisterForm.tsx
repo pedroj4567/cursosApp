@@ -187,7 +187,7 @@ export const RegisterForm = ({ onModeChange }: RegisterFormProps) => {
         <div className="ml-3 text-sm">
           <label htmlFor="terms" className="font-light text-gray-700">
             Acepto los{" "}
-            <a href="#" className="font-medium text-cyan-600 hover:underline">
+            <a href="#" className="font-medium text-blue-600 hover:underline">
               términos y condiciones
             </a>
           </label>
@@ -199,7 +199,7 @@ export const RegisterForm = ({ onModeChange }: RegisterFormProps) => {
 
       <Button
         type="submit"
-        className="w-full bg-teal-500 hover:bg-teal-600 text-white py-2"
+        className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2"
         disabled={isLoading}
       >
         {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
@@ -210,7 +210,7 @@ export const RegisterForm = ({ onModeChange }: RegisterFormProps) => {
         <button
           type="button"
           onClick={() => onModeChange("login")}
-          className="font-medium text-cyan-600 hover:underline"
+          className="font-medium text-blue-600 hover:underline"
         >
           Inicia Sesión
         </button>

@@ -8,7 +8,7 @@ const Navbar = () => {
   const { pathname } = useLocation();
   console.log(pathname);
   return (
-    <nav className="bg-gradient-to-r from-cyan-700 to-teal-500 text-white p-4 shadow-md z-50 absolute w-full">
+    <nav className=" bg-blue-700  text-white p-4 shadow-md z-50 absolute w-full">
       <div className="container mx-auto flex justify-between items-center">
         <div className="text-xl font-bold">FrostAcademy</div>
 

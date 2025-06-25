@@ -38,7 +38,7 @@ const AuthPage = () => {
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${pexelsImage})` }}
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-cyan-700/70 via-teal-500/20 to-emerald-400/50 bg-opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-br  bg-opacity-80" />
 
         <div className="relative h-full flex items-center justify-center p-4 sm:p-6 md:p-8">
           <AnimatePresence mode="wait">
@@ -166,7 +166,7 @@ const AuthPage = () => {
                     )
                   }
                   disabled={isAnimating}
-                  className=" bg-teal-500 hover:bg-teal-600  text-xs sm:text-sm px-4 sm:px-6 py-1 sm:py-2"
+                  className=" bg-blue-500 hover:bg-blue-600  text-xs sm:text-sm px-4 sm:px-6 py-1 sm:py-2"
                 >
                   {authMode === "login"
                     ? "Regístrate aquí"

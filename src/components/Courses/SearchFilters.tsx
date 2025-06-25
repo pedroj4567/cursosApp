@@ -35,7 +35,7 @@ const SearchFilters = ({
         </div>
         <button
           onClick={onSearch}
-          className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors"
+          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors"
         >
           Buscar
         </button>
@@ -48,8 +48,8 @@ const SearchFilters = ({
           onClick={() => onCategoryChange(null)}
           className={`px-3 py-1 rounded-full text-sm font-medium ${
             selectedCategoryId === null
-              ? "bg-teal-100 text-teal-800"
-              : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+              ? "bg-blue-600 text-white"
+              : " text-gray-800 hover:bg-gray-200"
           }`}
         >
           Todos
@@ -61,8 +61,8 @@ const SearchFilters = ({
             onClick={() => onCategoryChange(category.slug)}
             className={`px-3 py-1 rounded-full text-sm font-medium ${
               selectedCategoryId === category.slug // Cambiado de uuid a slug
-                ? "bg-teal-100 text-teal-800"
-                : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                ? "bg-blue-600 text-white"
+                : " text-gray-800 hover:bg-gray-200"
             }`}
           >
             {category.name}
