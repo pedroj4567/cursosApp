@@ -22,7 +22,7 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<LandingPage />} />
-
+          <Route index path="/reports" element={<AdminReportPage />} />
           <Route path="/auth" element={<AuthLayout />}>
             <Route index element={<AuthPage />} />
           </Route>
@@ -55,8 +55,6 @@ function App() {
               element={<CoursePlayerPage />}
             />
             <Route index path="/course/quiz/:id" element={<QuizPage />} />
-
-            <Route index path="/reports" element={<AdminReportPage />} />
           </Route>
         </Routes>
       </AuthProvider>
