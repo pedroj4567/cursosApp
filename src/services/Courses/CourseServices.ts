@@ -225,4 +225,49 @@ export const courseServices = {
       throw new Error("No se pudo completar la inscripción");
     }
   },
+
+  async seeLaterCourse(courseId: string | number): Promise<boolean> {
+    try {
+      const token = localStorage.getItem("jwt");
+      const user = localStorage.getItem("user");
+
+      if (!token || !user) {
+        throw new Error("Usuario no autenticado");
+      }
+
+      const userParsed = JSON.parse(user);
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      // Verificar primero si la relación existe
+      const relationCheck = await axiosInstance.get(
+        `/users/${userParsed.id}/course_see_laters/${courseId}`,
+        { headers }
+      );
+
+      console.log(relationCheck);
+      const relationExists = relationCheck.status === 200;
+
+      if (relationExists) {
+        // Eliminar relación
+        await axiosInstance.delete(`/users/${userParsed.id}/${courseId}`, {
+          headers,
+        });
+      } else {
+        // Crear relación
+        await axiosInstance.put(
+          `/users/${userParsed.id}/course_see_laters`,
+          { id: courseId },
+          { headers }
+        );
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error en seeLaterCourse:", error);
+      throw new Error("No se pudo actualizar la lista 'Ver más tarde'");
+    }
+  },
 };

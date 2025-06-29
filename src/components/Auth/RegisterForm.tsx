@@ -205,7 +205,7 @@ export const RegisterForm = ({ onModeChange }: RegisterFormProps) => {
         {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
       </Button>
 
-      <div className="text-center text-sm text-gray-600 mt-4">
+      {/* <div className="text-center text-sm text-gray-600 mt-4">
         ¿Ya tienes una cuenta?{" "}
         <button
           type="button"
@@ -214,7 +214,7 @@ export const RegisterForm = ({ onModeChange }: RegisterFormProps) => {
         >
           Inicia Sesión
         </button>
-      </div>
+      </div> */}
     </form>
   );
 };

@@ -13,7 +13,7 @@ const AuthPage = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   // Imagen de Pexels
   const pexelsImage =
-    "https://images.pexels.com/photos/5554246/pexels-photo-5554246.jpeg";
+    "https://images.pexels.com/photos/1181673/pexels-photo-1181673.jpeg";
 
   const handleModeChange = (newMode: string) => {
     if (isAnimating) return;
@@ -111,7 +111,21 @@ const AuthPage = () => {
       </motion.div>
 
       {/* Lado derecho - Formularios */}
-      <div className="w-full md:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8 bg-white">
+      <div className="w-full md:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8 bg-white relative overflow-hidden">
+        {/* Fondo de marca de agua */}
+        <div
+          className="absolute inset-0 opacity-10 z-0 flex items-center justify-center"
+          style={{
+            backgroundImage: `url(https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjp3JNGWof-A6qkxOVRor_4BRieKFrlzrn0Ivzo32vwEy-hbcSGwLSnlIQn8t710-rDQEj_1RRXh8Vw5Cq10NPfQadXLb8gqrPSYWIKWv_WMJ5eCtWoXiZ9UentYicDzyPsDKnD4Fd3BAY/w1200-h630-p-k-no-nu/Condolencia_logo-unerg.png)`,
+            backgroundSize: "contain",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center center",
+            width: "80%", // Controla el ancho de la marca de agua
+            height: "70%", // Controla el alto de la marca de agua
+            margin: "auto", // Centra el elemento
+          }}
+        />
+
         <AnimatePresence mode="wait">
           <motion.div
             key={authMode}
@@ -119,25 +133,30 @@ const AuthPage = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: authMode === "login" ? -20 : 20 }}
             transition={{ duration: 0.3 }}
-            className="w-full max-w-xs sm:max-w-sm md:max-w-md"
+            className="w-full max-w-xs sm:max-w-sm md:max-w-md relative z-10" // Añadido relative z-10
           >
-            <div className="mb-4 sm:mb-6 md:mb-8">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">
-                {authMode === "login"
-                  ? "Bienvenido"
-                  : authMode === "register"
-                  ? "Registro"
-                  : "Recuperar contraseña"}
-              </h2>
-              <p className="text-xs sm:text-sm md:text-base text-gray-600">
-                {authMode === "login"
-                  ? "Ingresa tus credenciales"
-                  : authMode === "register"
-                  ? "Completa el formulario"
-                  : "Ingresa tu correo electrónico"}
-              </p>
+            {/* Eliminado el div de la imagen que estaba aquí */}
+
+            <div className="mb-4 sm:mb-6 md:mb-8 flex flex-col">
+              <div>
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">
+                  {authMode === "login"
+                    ? "Bienvenido"
+                    : authMode === "register"
+                    ? "Registro"
+                    : "Recuperar contraseña"}
+                </h2>
+                <p className="text-xs sm:text-sm md:text-base text-gray-600">
+                  {authMode === "login"
+                    ? "Ingresa tus credenciales"
+                    : authMode === "register"
+                    ? "Completa el formulario"
+                    : "Ingresa tu correo electrónico"}
+                </p>
+              </div>
             </div>
 
+            {/* Resto del código permanece igual */}
             {authMode === "login" && (
               <LoginForm onModeChange={handleModeChange} />
             )}
@@ -150,7 +169,7 @@ const AuthPage = () => {
               <ForgotPasswordForm onModeChange={handleModeChange} />
             )}
 
-            <div className="mt-4 sm:mt-6 md:mt-8 text-center flex items-center  justify-center gap-4">
+            <div className="mt-4 sm:mt-6 md:mt-8 text-center flex items-center justify-center gap-4">
               <p className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">
                 {authMode === "login"
                   ? "¿No tienes una cuenta?"
@@ -166,7 +185,7 @@ const AuthPage = () => {
                     )
                   }
                   disabled={isAnimating}
-                  className=" bg-blue-500 hover:bg-blue-600  text-xs sm:text-sm px-4 sm:px-6 py-1 sm:py-2"
+                  className="bg-blue-500 hover:bg-blue-600 text-xs sm:text-sm px-4 sm:px-6 py-1 sm:py-2"
                 >
                   {authMode === "login"
                     ? "Regístrate aquí"
