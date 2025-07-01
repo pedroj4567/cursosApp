@@ -1,210 +1,234 @@
-import React, { useState } from "react";
-import * as XLSX from "xlsx";
+import { useState, useEffect } from "react";
+import {
+  Card,
+  Table,
+  Badge,
+  Alert,
+  Spinner,
+  TableBody,
+  TableHead,
+  TableHeadCell,
+  TableRow,
+  TableCell,
+  Button,
+} from "flowbite-react";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+import { Course } from "../../pages/Courses/types";
+import { courseServices } from "../../services/Courses";
 
-const AdminReportPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [token, setToken] = useState("");
-  const [error, setError] = useState("");
+const ReportsPage = () => {
+  const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(false);
-  const [reportData, setReportData] = useState({
-    users: [],
-    courses: [],
-  });
+  const [error, setError] = useState<string | null>(null);
+  const [generatingPDF, setGeneratingPDF] = useState<number | null>(null);
 
-  // Datos de ejemplo (reemplazar con llamadas API reales)
-  const mockUsers = [
-    { id: 1, name: "Usuario 1", email: "usuario1@test.com", role: "admin" },
-    { id: 2, name: "Usuario 2", email: "usuario2@test.com", role: "user" },
-  ];
+  useEffect(() => {
+    fetchCourses();
+  }, []);
 
-  const mockCourses = [
-    { id: 1, title: "Curso React", students: 25, duration: "4 semanas" },
-    { id: 2, title: "Curso Node.js", students: 18, duration: "6 semanas" },
-  ];
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const fetchCourses = async () => {
     setLoading(true);
-    setError("");
-
+    setError(null);
     try {
-      // Simulación de login (reemplazar con API real)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      if (email === "admin@test.com" && password === "admin123") {
-        const mockToken = "mock-token-123456";
-        setToken(mockToken);
-        localStorage.setItem("authToken", mockToken);
-      } else {
-        throw new Error("Credenciales inválidas");
-      }
+      // Usamos el servicio getCoursesByPage con parámetros por defecto
+      const coursesData = await courseServices.getCoursesByPage(1, 10);
+      setCourses(coursesData);
     } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchData = async (endpoint) => {
-    // Simulación de API (reemplazar con llamadas reales)
-    console.log(`Fetching ${endpoint} with token: ${token}`);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    if (endpoint === "users") return mockUsers;
-    if (endpoint === "courses") return mockCourses;
-    return [];
-  };
-
-  const generateReport = async () => {
-    setLoading(true);
-    try {
-      const [users, courses] = await Promise.all([
-        fetchData("users"),
-        fetchData("courses"),
-      ]);
-
-      setReportData({ users, courses });
-
-      // Crear libro de Excel
-      const workbook = XLSX.utils.book_new();
-
-      // Hoja de usuarios
-      const userWorksheet = XLSX.utils.json_to_sheet(users);
-      XLSX.utils.book_append_sheet(workbook, userWorksheet, "Usuarios");
-
-      // Hoja de cursos
-      const courseWorksheet = XLSX.utils.json_to_sheet(courses);
-      XLSX.utils.book_append_sheet(workbook, courseWorksheet, "Cursos");
-
-      // Generar archivo
-      XLSX.writeFile(workbook, "Reporte_Admin.xlsx");
-    } catch (err) {
-      setError("Error generando reporte");
+      setError("Error al cargar los cursos. Intente nuevamente.");
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLogout = () => {
-    setToken("");
-    localStorage.removeItem("authToken");
+  const getBase64ImageFromURL = async (url: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.setAttribute("crossOrigin", "anonymous");
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+          const dataURL = canvas.toDataURL("image/jpeg");
+          resolve(dataURL);
+        } else {
+          reject(new Error("Could not get canvas context"));
+        }
+      };
+      img.onerror = (error) => reject(error);
+      img.src = url;
+    });
   };
 
-  if (!token) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow-md w-96">
-          <h2 className="text-2xl font-bold mb-6 text-center">Admin Login</h2>
+  const generateCoursePDF = async (course: Course) => {
+    setGeneratingPDF(course.id);
+    try {
+      const doc = new jsPDF();
 
-          {error && (
-            <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
-              {error}
-            </div>
-          )}
+      // Configuración inicial
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(20);
+      doc.setTextColor(40);
+      doc.text(`Reporte del Curso: ${course.title}`, 15, 20);
 
-          <form onSubmit={handleLogin}>
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-2">Email</label>
-              <input
-                type="email"
-                className="w-full p-2 border rounded"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
+      // Agregar imagen si existe (ajusta según la estructura de tu Course)
+      if (course.imageUrl) {
+        try {
+          const imgData = await getBase64ImageFromURL(course.imageUrl);
+          doc.addImage(imgData, "JPEG", 15, 30, 50, 30);
+        } catch (imgError) {
+          console.error("Error al cargar la imagen:", imgError);
+        }
+      }
 
-            <div className="mb-6">
-              <label className="block text-gray-700 mb-2">Password</label>
-              <input
-                type="password"
-                className="w-full p-2 border rounded"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+      // Información básica del curso
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+      // doc.text(
+      //   `Categoría: ${course.category?.name || "Sin categoría"}`,
+      //   70,
+      //   40
+      // );
+      doc.text(`Descripción:`, 15, 70);
 
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
-              disabled={loading}
-            >
-              {loading ? "Iniciando..." : "Iniciar Sesión"}
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
+      // Dividir la descripción en líneas
+      const splitDescription = doc.splitTextToSize(course.description, 180);
+      doc.text(splitDescription, 15, 80);
+
+      // Usuarios inscritos (necesitarías ajustar según tu modelo)
+      doc.setFont("helvetica", "bold");
+      // doc.text(
+      //   `Total de inscripciones: ${course.enrollmentsCount || 0}`,
+      //   15,
+      //   120
+      // );
+
+      // Aquí podrías agregar más información específica de tu modelo Course
+
+      // Pie de página
+      const pageCount = doc.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.setTextColor(150);
+        doc.text(
+          `Página ${i} de ${pageCount}`,
+          180,
+          doc.internal.pageSize.height - 10,
+          { align: "right" }
+        );
+        doc.text(
+          `Generado el: ${new Date().toLocaleDateString()}`,
+          15,
+          doc.internal.pageSize.height - 10
+        );
+      }
+
+      // Guardar el PDF
+      doc.save(`reporte-curso-${course.title}.pdf`);
+    } catch (err) {
+      console.error("Error al generar PDF:", err);
+      setError("Error al generar el reporte PDF");
+    } finally {
+      setGeneratingPDF(null);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-xl font-bold text-gray-900">
-            Panel de Administración
-          </h1>
-          <button
-            onClick={handleLogout}
-            className="text-gray-600 hover:text-gray-900"
-          >
-            Cerrar Sesión
-          </button>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">Reportes de Cursos</h1>
+        <Button onClick={() => fetchCourses()} color="gray">
+          Refrescar datos
+        </Button>
+      </div>
+
+      {error && (
+        <Alert color="failure" className="mb-4">
+          {error}
+        </Alert>
+      )}
+
+      {loading && !courses.length ? (
+        <div className="text-center py-12">
+          <Spinner size="xl" />
+          <p className="mt-4">Cargando cursos...</p>
         </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-lg font-medium mb-4">Generar Reportes</h2>
-
-            {error && (
-              <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
-                {error}
-              </div>
-            )}
-
-            <div className="mb-6">
-              <h3 className="text-md font-medium mb-2">Datos disponibles:</h3>
-              <ul className="list-disc pl-5">
-                <li>Usuarios: {reportData.users.length} registros</li>
-                <li>Cursos: {reportData.courses.length} registros</li>
-              </ul>
-            </div>
-
-            <button
-              onClick={generateReport}
-              disabled={loading}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center"
-            >
-              {loading ? (
-                <span>Generando...</span>
-              ) : (
-                <>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                      clipRule="evenodd"
+      ) : (
+        <div className="space-y-6">
+          {courses.map((course) => (
+            <Card key={course.id} className="hover:shadow-lg">
+              <div className="flex flex-col md:flex-row gap-6">
+                <div className="w-full md:w-1/4">
+                  {course.imageUrl && (
+                    <img
+                      src={course.imageUrl}
+                      alt={course.title}
+                      className="w-full h-48 object-cover rounded-lg"
                     />
-                  </svg>
-                  Descargar Reporte (Excel)
-                </>
-              )}
-            </button>
-          </div>
+                  )}
+                </div>
+
+                <div className="w-full md:w-3/4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge color="info">
+                      {course.category?.name || "Sin categoría"}
+                    </Badge>
+                    <Badge color={course.isPremium ? "warning" : "success"}>
+                      {course.isPremium ? "Premium" : "Gratis"}
+                    </Badge>
+                  </div>
+
+                  <h3 className="text-xl font-bold text-gray-800 mb-2">
+                    {course.title}
+                  </h3>
+                  <p className="text-gray-600 mb-4">{course.description}</p>
+
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-sm text-gray-500">
+                        <span className="font-semibold">Creado:</span>{" "}
+                        {new Date(course.createdAt).toLocaleDateString()}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        <span className="font-semibold">Actualizado:</span>{" "}
+                        {new Date(course.updatedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Button
+                      onClick={() => generateCoursePDF(course)}
+                      disabled={generatingPDF === course.id}
+                    >
+                      {generatingPDF === course.id ? (
+                        <>
+                          <Spinner size="sm" className="mr-2" />
+                          Generando...
+                        </>
+                      ) : (
+                        "Descargar Reporte"
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <Button
+                className="bg-blue-500"
+                onClick={() => {
+                  generateCoursePDF(course);
+                }}
+              >
+                Descargar Reporte
+              </Button>
+            </Card>
+          ))}
         </div>
-      </main>
+      )}
     </div>
   );
 };
 
-export default AdminReportPage;
+export default ReportsPage;
