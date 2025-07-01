@@ -178,9 +178,6 @@ const ReportsPage = () => {
                     <Badge color="info">
                       {course.category?.name || "Sin categoría"}
                     </Badge>
-                    <Badge color={course.isPremium ? "warning" : "success"}>
-                      {course.isPremium ? "Premium" : "Gratis"}
-                    </Badge>
                   </div>
 
                   <h3 className="text-xl font-bold text-gray-800 mb-2">
