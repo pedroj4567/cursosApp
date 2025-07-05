@@ -34,7 +34,6 @@ const AdminCoursesPage = () => {
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState("");
 
-  // Estados para cursos
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +41,6 @@ const AdminCoursesPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [token, setToken] = useState("");
 
-  // Verificar autenticación al cargar
   useEffect(() => {
     const storedToken = localStorage.getItem("adminAuthToken");
     if (storedToken) {
@@ -52,7 +50,6 @@ const AdminCoursesPage = () => {
     }
   }, []);
 
-  // Autenticación de administrador con validación hardcodeada
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthLoading(true);
@@ -77,7 +74,6 @@ const AdminCoursesPage = () => {
     }
   };
 
-  // Obtener cursos (usando adminAuthToken)
   const fetchCourses = async () => {
     setLoading(true);
     setError(null);
@@ -87,7 +83,7 @@ const AdminCoursesPage = () => {
 
       const response = await axiosInstance.get("/courses?populate=*", {
         headers: {
-          Authorization: `Bearer ${storedToken}`,
+          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiaWF0IjoxNzUxNzUzOTQ1LCJleHAiOjE3NTQzNDU5NDV9.27CrQ2axkBX0KT3NsTK98rUGy9h1rMp8c1xxdKitmeY`,
           "Content-Type": "application/json",
         },
       });
@@ -119,14 +115,12 @@ const AdminCoursesPage = () => {
     }
   };
 
-  // Cerrar sesión
   const handleLogout = () => {
     localStorage.removeItem("adminAuthToken");
     setIsAuthenticated(false);
     setCourses([]);
   };
 
-  // Función para obtener imagen base64 desde URL
   const getBase64ImageFromURL = async (url: string): Promise<string> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -160,7 +154,6 @@ const AdminCoursesPage = () => {
       doc.setTextColor(40);
       doc.text(`Reporte del Curso: ${course.title}`, 15, 20);
 
-      // Imagen si existe
       if (course.imageUrl) {
         try {
           const imgData = await getBase64ImageFromURL(course.imageUrl);
@@ -170,7 +163,6 @@ const AdminCoursesPage = () => {
         }
       }
 
-      // Categorías
       doc.setFont("helvetica", "normal");
       doc.setFontSize(12);
       course.categories.forEach((cat, index) => {
