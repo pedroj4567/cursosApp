@@ -1,47 +1,132 @@
 import { useState, useEffect } from "react";
 import {
   Card,
-  Table,
   Badge,
   Alert,
   Spinner,
-  TableBody,
-  TableHead,
-  TableHeadCell,
-  TableRow,
-  TableCell,
   Button,
+  TextInput,
+  Label,
 } from "flowbite-react";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import { Course } from "../../pages/Courses/types";
-import { courseServices } from "../../services/Courses";
+import axiosInstance from "../../lib/axios";
 
-const ReportsPage = () => {
+type Course = {
+  id: number;
+  title: string;
+  description: string;
+  imageUrl?: string;
+  publishedAt: string;
+  categories: Array<{ name: string }>;
+  users: Array<{
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+  }>;
+};
+
+const AdminCoursesPage = () => {
+  // Estados para autenticación
+  const [email, setEmail] = useState("admin@admin.com");
+  const [password, setPassword] = useState("Admin123$");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState("");
+
+  // Estados para cursos
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generatingPDF, setGeneratingPDF] = useState<number | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [token, setToken] = useState("");
 
+  // Verificar autenticación al cargar
   useEffect(() => {
-    fetchCourses();
+    const storedToken = localStorage.getItem("adminAuthToken");
+    if (storedToken) {
+      setToken(storedToken);
+      setIsAuthenticated(true);
+      fetchCourses();
+    }
   }, []);
 
+  // Autenticación de administrador con validación hardcodeada
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    setAuthError("");
+
+    try {
+      if (email === "admin@admin.com" && password === "Admin123$") {
+        // Usa el token guardado en localStorage o un token fijo
+        const savedToken = localStorage.getItem("jwt") || "fake-jwt-token";
+        localStorage.setItem("adminAuthToken", savedToken);
+        setToken(savedToken);
+        setIsAuthenticated(true);
+        fetchCourses();
+      } else {
+        setAuthError("Credenciales inválidas. Intente nuevamente.");
+      }
+    } catch (err) {
+      setAuthError("Error de autenticación. Verifique sus credenciales.");
+      console.error("Login error:", err);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // Obtener cursos (usando adminAuthToken)
   const fetchCourses = async () => {
     setLoading(true);
     setError(null);
     try {
-      // Usamos el servicio getCoursesByPage con parámetros por defecto
-      const coursesData = await courseServices.getCoursesByPage(1, 10);
+      const storedToken = localStorage.getItem("adminAuthToken");
+      if (!storedToken) throw new Error("No autenticado");
+
+      const response = await axiosInstance.get("/courses?populate=*", {
+        headers: {
+          Authorization: `Bearer ${storedToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const coursesData = response.data.data.map((course: any) => ({
+        id: course.id,
+        title: course.title,
+        description: course.description,
+        imageUrl: course.imageUrl,
+        publishedAt: course.publishedAt,
+        categories:
+          course.categories?.map((cat: any) => ({
+            name: cat.name,
+          })) || [],
+        users:
+          course.users?.map((user: any) => ({
+            id: user.id,
+            name: user.username,
+            email: user.email,
+            role: user.role,
+          })) || [],
+      }));
       setCourses(coursesData);
     } catch (err) {
-      setError("Error al cargar los cursos. Intente nuevamente.");
-      console.error(err);
+      setError("Error al cargar cursos. Intente nuevamente.");
+      console.error("Fetch courses error:", err);
     } finally {
       setLoading(false);
     }
   };
 
+  // Cerrar sesión
+  const handleLogout = () => {
+    localStorage.removeItem("adminAuthToken");
+    setIsAuthenticated(false);
+    setCourses([]);
+  };
+
+  // Función para obtener imagen base64 desde URL
   const getBase64ImageFromURL = async (url: string): Promise<string> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -64,18 +149,18 @@ const ReportsPage = () => {
     });
   };
 
+  // Generar PDF del curso
   const generateCoursePDF = async (course: Course) => {
-    setGeneratingPDF(course.id);
     try {
       const doc = new jsPDF();
 
-      // Configuración inicial
+      // Título
       doc.setFont("helvetica", "bold");
       doc.setFontSize(20);
       doc.setTextColor(40);
       doc.text(`Reporte del Curso: ${course.title}`, 15, 20);
 
-      // Agregar imagen si existe (ajusta según la estructura de tu Course)
+      // Imagen si existe
       if (course.imageUrl) {
         try {
           const imgData = await getBase64ImageFromURL(course.imageUrl);
@@ -85,31 +170,69 @@ const ReportsPage = () => {
         }
       }
 
-      // Información básica del curso
+      // Categorías
       doc.setFont("helvetica", "normal");
       doc.setFontSize(12);
-      // doc.text(
-      //   `Categoría: ${course.category?.name || "Sin categoría"}`,
-      //   70,
-      //   40
-      // );
-      doc.text(`Descripción:`, 15, 70);
+      course.categories.forEach((cat, index) => {
+        doc.text(
+          `Categoría: ${cat?.name || "Sin categoría"}`,
+          70,
+          40 + index * 5
+        );
+      });
 
-      // Dividir la descripción en líneas
+      // Descripción
+      doc.text(`Descripción:`, 15, 70);
       const splitDescription = doc.splitTextToSize(course.description, 180);
       doc.text(splitDescription, 15, 80);
 
-      // Usuarios inscritos (necesitarías ajustar según tu modelo)
-      doc.setFont("helvetica", "bold");
-      // doc.text(
-      //   `Total de inscripciones: ${course.enrollmentsCount || 0}`,
-      //   15,
-      //   120
-      // );
+      const usersCount = course.users?.length || 0;
 
-      // Aquí podrías agregar más información específica de tu modelo Course
+      // Tabla usuarios inscritos
+      if (usersCount > 0) {
+        doc.text("Lista de Usuarios Inscritos:", 15, 140);
 
-      // Pie de página
+        const userData = course.users.map((user) => [
+          user.id || "N/A",
+          user.name || "Sin nombre",
+          user.email || "Sin email",
+        ]);
+
+        autoTable(doc, {
+          startY: 145,
+          head: [["ID", "Nombre", "Email", "Rol"]],
+          body: userData,
+          theme: "grid",
+          headStyles: {
+            fillColor: [41, 128, 185],
+            textColor: 255,
+            fontStyle: "bold",
+          },
+          styles: {
+            fontSize: 9,
+            cellPadding: 3,
+            overflow: "linebreak",
+          },
+          margin: { left: 15 },
+          didDrawPage: (data) => {
+            if (data.pageNumber === data.pageCount) {
+              const finalY = data.cursor?.y || 145 + userData.length * 10;
+              doc.setFont("helvetica", "bold");
+              doc.setFontSize(12);
+              doc.text(
+                `Total de inscripciones: ${usersCount}`,
+                15,
+                finalY + 15
+              );
+            }
+          },
+        });
+      } else {
+        doc.setFont("helvetica", "bold");
+        doc.text(`Total de inscripciones: ${usersCount}`, 15, 140);
+      }
+
+      // Pie de página con número y fecha
       const pageCount = doc.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
@@ -128,8 +251,7 @@ const ReportsPage = () => {
         );
       }
 
-      // Guardar el PDF
-      doc.save(`reporte-curso-${course.title}.pdf`);
+      doc.save(`reporte-curso-${course.title.replace(/[^a-z0-9]/gi, "_")}.pdf`);
     } catch (err) {
       console.error("Error al generar PDF:", err);
       setError("Error al generar el reporte PDF");
@@ -138,13 +260,74 @@ const ReportsPage = () => {
     }
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+        <Card className="w-full max-w-md">
+          <h1 className="text-2xl font-bold text-center mb-6">
+            Acceso Administrador
+          </h1>
+          {authError && (
+            <Alert color="failure" className="mb-4">
+              {authError}
+            </Alert>
+          )}
+          <form onSubmit={handleAdminLogin} className="space-y-6">
+            <div>
+              <Label htmlFor="email" value="Email Administrador" />
+              <TextInput
+                id="email"
+                type="email"
+                placeholder="admin@admin.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="password" value="Contraseña" />
+              <TextInput
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full bg-blue-400"
+              disabled={authLoading}
+            >
+              {authLoading ? (
+                <>
+                  <Spinner size="sm" className="mr-2" />
+                  Iniciando sesión...
+                </>
+              ) : (
+                "Acceder como Administrador"
+              )}
+            </Button>
+          </form>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Reportes de Cursos</h1>
-        <Button onClick={() => fetchCourses()} color="gray">
-          Refrescar datos
-        </Button>
+        <h1 className="text-3xl font-bold text-gray-800">
+          Reportes de Cursos (Admin)
+        </h1>
+        <div className="flex gap-4">
+          <Button onClick={() => fetchCourses()} color="gray">
+            Refrescar datos
+          </Button>
+          <Button onClick={handleLogout} color="failure">
+            Cerrar Sesión
+          </Button>
+        </div>
       </div>
 
       {error && (
@@ -161,7 +344,7 @@ const ReportsPage = () => {
       ) : (
         <div className="space-y-6">
           {courses.map((course) => (
-            <Card key={course.id} className="hover:shadow-lg">
+            <Card key={course.id} className="hover:shadow-lg transition-shadow">
               <div className="flex flex-col md:flex-row gap-6">
                 <div className="w-full md:w-1/4">
                   {course.imageUrl && (
@@ -173,32 +356,40 @@ const ReportsPage = () => {
                   )}
                 </div>
 
-                <div className="w-full md:w-3/4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge color="info">
-                      {course.category?.name || "Sin categoría"}
-                    </Badge>
+                <div className="w-full md:w-3/4 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      {course.categories?.map((category, index) => (
+                        <Badge key={index} color="info">
+                          {category?.name || "Sin categoría"}
+                        </Badge>
+                      ))}
+                    </div>
+
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">
+                      {course.title}
+                    </h3>
+                    <p className="text-gray-600 mb-4 line-clamp-3">
+                      {course.description}
+                    </p>
                   </div>
 
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">
-                    {course.title}
-                  </h3>
-                  <p className="text-gray-600 mb-4">{course.description}</p>
-
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mt-4">
                     <div>
                       <p className="text-sm text-gray-500">
                         <span className="font-semibold">Creado:</span>{" "}
-                        {new Date(course.createdAt).toLocaleDateString()}
+                        {new Date(course.publishedAt).toLocaleDateString()}
                       </p>
                       <p className="text-sm text-gray-500">
-                        <span className="font-semibold">Actualizado:</span>{" "}
-                        {new Date(course.updatedAt).toLocaleDateString()}
+                        <span className="font-semibold">Inscritos:</span>{" "}
+                        {course.users?.length || 0}
                       </p>
                     </div>
                     <Button
                       onClick={() => generateCoursePDF(course)}
                       disabled={generatingPDF === course.id}
+                      className="bg-blue-600 hover:bg-blue-700 4"
+                      size="md"
                     >
                       {generatingPDF === course.id ? (
                         <>
@@ -212,14 +403,6 @@ const ReportsPage = () => {
                   </div>
                 </div>
               </div>
-              <Button
-                className="bg-blue-500"
-                onClick={() => {
-                  generateCoursePDF(course);
-                }}
-              >
-                Descargar Reporte
-              </Button>
             </Card>
           ))}
         </div>
@@ -228,4 +411,4 @@ const ReportsPage = () => {
   );
 };
 
-export default ReportsPage;
+export default AdminCoursesPage;

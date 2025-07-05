@@ -40,6 +40,7 @@ export interface StrapiCourseResponse {
   category: Category[];
   chapters: Chapter[];
   quizzes: any[];
+  users: any[];
 }
 
 export type Course = {
@@ -58,6 +59,7 @@ export type Course = {
   chapters: Chapter[];
   courses: Course[];
   quizzes: any[];
+  users: any[];
 };
 
 export function fromJsonToCourse(json: StrapiCourseResponse): Course {
@@ -79,5 +81,6 @@ export function fromJsonToCourse(json: StrapiCourseResponse): Course {
     hours: json.totalHours || 0,
     chapters: json.chapters || [],
     quizzes: json.quizzes || [],
+    users: json.users || [],
   };
 }

@@ -32,12 +32,9 @@ export const courseServices = {
         "Content-Type": "application/json",
       };
 
-      const response = await axiosInstance.get(
-        `/courses?populate[category][fields][0]=name&pagination[page]=${page}&pagination[pageSize]=${size}`,
-        {
-          headers: headers,
-        }
-      );
+      const response = await axiosInstance.get(`/courses?populate=*`, {
+        headers: headers,
+      });
 
       if (response.status != 200) {
         throw new Error("Error al obtener los cursos");
