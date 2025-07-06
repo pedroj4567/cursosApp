@@ -8,7 +8,7 @@ import {
   TextInput,
   Label,
 } from "flowbite-react";
-import { jsPDF } from "jspdf";
+import { GState, jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import axiosInstance from "../../lib/axios";
 
@@ -143,55 +143,123 @@ const AdminCoursesPage = () => {
     });
   };
 
-  // Generar PDF del curso
   const generateCoursePDF = async (course: Course) => {
     try {
       const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margin = 15;
+      const imgWidth = 80;
+      const imgHeight = 50;
+      const textWidth = pageWidth - margin * 3 - imgWidth;
 
-      // Título
+      // 1. Añadir logo institucional junto al membrete
+      const addLogo = async () => {
+        try {
+          const logoData = "/logoUnerg.png";
+          const logoWidth = 50;
+          const logoHeight = 30;
+          const logoX = pageWidth - margin - logoWidth;
+          const logoY = 15;
+
+          doc.addImage(
+            logoData,
+            "PNG",
+            logoX,
+            logoY,
+            logoWidth,
+            logoHeight,
+            undefined,
+            "NONE" // Mantener transparencia
+          );
+        } catch (error) {
+          console.error("Error al cargar logo:", error);
+        }
+      };
+
+      // 2. Encabezado institucional con logo
+      await addLogo(); // Añadir logo primero
+
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(20);
-      doc.setTextColor(40);
-      doc.text(`Reporte del Curso: ${course.title}`, 15, 20);
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
 
+      // Texto institucional (ajustado a la izquierda)
+      doc.text("REPÚBLICA BOLIVARIANA DE VENEZUELA", margin, 20);
+      doc.text(
+        "MINISTERIO DEL PODER POPULAR PARA LA EDUCACIÓN UNIVERSITARIA",
+        margin,
+        25
+      );
+      doc.text("CIENCIA Y TECNOLOGÍA", margin, 30);
+      doc.text(
+        "UNIVERSIDAD NACIONAL EXPERIMENTAL DE LOS LLANOS CENTRALES",
+        margin,
+        35
+      );
+      doc.text("'RÓMULO GALLEGOS'", margin, 40);
+
+      // Línea divisoria
+      doc.setDrawColor(150);
+      doc.line(margin, 45, pageWidth - margin, 45);
+
+      // 3. Título del curso
+      doc.setFontSize(16);
+      doc.text(`Reporte del Curso: ${course.title}`, margin, 55);
+
+      // 4. Sección imagen + descripción (2 columnas)
+      let currentY = 65;
+
+      // Imagen del curso (izquierda)
       if (course.imageUrl) {
         try {
           const imgData = await getBase64ImageFromURL(course.imageUrl);
-          doc.addImage(imgData, "JPEG", 15, 30, 50, 30);
+          doc.addImage(imgData, "JPEG", margin, currentY, imgWidth, imgHeight);
         } catch (imgError) {
-          console.error("Error al cargar la imagen:", imgError);
+          console.error("Error al cargar la imagen del curso:", imgError);
         }
       }
 
+      // Descripción y categorías (derecha)
+      const textX = margin * 2 + imgWidth;
+
+      // Categorías
       doc.setFont("helvetica", "normal");
       doc.setFontSize(12);
       course.categories.forEach((cat, index) => {
         doc.text(
           `Categoría: ${cat?.name || "Sin categoría"}`,
-          70,
-          40 + index * 5
+          textX,
+          currentY + index * 5
         );
       });
 
       // Descripción
-      doc.text(`Descripción:`, 15, 70);
-      const splitDescription = doc.splitTextToSize(course.description, 180);
-      doc.text(splitDescription, 15, 80);
+      const descY =
+        currentY + Math.max(course.categories.length * 5, imgHeight / 2);
+      doc.text(`Descripción:`, textX, descY);
+      const splitDescription = doc.splitTextToSize(
+        course.description,
+        textWidth
+      );
+      doc.text(splitDescription, textX, descY + 5);
+
+      // 5. Tabla de usuarios
+      const tableStartY = currentY + imgHeight + 30;
 
       const usersCount = course.users?.length || 0;
+      doc.setFont("helvetica", "bold");
+      doc.text("Lista de Usuarios Inscritos:", margin, tableStartY);
 
-      // Tabla usuarios inscritos
       if (usersCount > 0) {
-        doc.text("Lista de Usuarios Inscritos:", 15, 140);
-
         const userData = course.users.map((user) => [
           user.id || "N/A",
           user.name || "Sin nombre",
           user.email || "Sin email",
+          user.role || "Sin rol",
         ]);
 
         autoTable(doc, {
-          startY: 145,
+          startY: tableStartY + 5,
           head: [["ID", "Nombre", "Email", "Rol"]],
           body: userData,
           theme: "grid",
@@ -205,26 +273,28 @@ const AdminCoursesPage = () => {
             cellPadding: 3,
             overflow: "linebreak",
           },
-          margin: { left: 15 },
+          margin: { left: margin, right: margin },
           didDrawPage: (data) => {
             if (data.pageNumber === data.pageCount) {
-              const finalY = data.cursor?.y || 145 + userData.length * 10;
-              doc.setFont("helvetica", "bold");
-              doc.setFontSize(12);
+              const finalY =
+                data.cursor?.y || tableStartY + 10 + userData.length * 10;
               doc.text(
                 `Total de inscripciones: ${usersCount}`,
-                15,
-                finalY + 15
+                margin,
+                finalY + 10
               );
             }
           },
         });
       } else {
-        doc.setFont("helvetica", "bold");
-        doc.text(`Total de inscripciones: ${usersCount}`, 15, 140);
+        doc.text(
+          `Total de inscripciones: ${usersCount}`,
+          margin,
+          tableStartY + 10
+        );
       }
 
-      // Pie de página con número y fecha
+      // 6. Pie de página
       const pageCount = doc.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
@@ -232,13 +302,13 @@ const AdminCoursesPage = () => {
         doc.setTextColor(150);
         doc.text(
           `Página ${i} de ${pageCount}`,
-          180,
+          pageWidth - margin,
           doc.internal.pageSize.height - 10,
           { align: "right" }
         );
         doc.text(
           `Generado el: ${new Date().toLocaleDateString()}`,
-          15,
+          margin,
           doc.internal.pageSize.height - 10
         );
       }
@@ -246,9 +316,7 @@ const AdminCoursesPage = () => {
       doc.save(`reporte-curso-${course.title.replace(/[^a-z0-9]/gi, "_")}.pdf`);
     } catch (err) {
       console.error("Error al generar PDF:", err);
-      setError("Error al generar el reporte PDF");
-    } finally {
-      setGeneratingPDF(null);
+      throw new Error("Error al generar el reporte PDF");
     }
   };
 

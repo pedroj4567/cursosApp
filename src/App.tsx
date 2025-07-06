@@ -15,7 +15,6 @@ import { AuthProvider } from "./contexts/AuthContext"; // Importa el AuthProvide
 import { CoursePlayLayout } from "./layouts/CoursePlayLayout";
 import QuizPage from "./pages/Courses/QuizPage";
 import AdminReportPage from "./pages/report/AdminReportPage";
-import CompactCoursesReportPage from "./pages/report/CompactCourseReport";
 
 function App() {
   return (

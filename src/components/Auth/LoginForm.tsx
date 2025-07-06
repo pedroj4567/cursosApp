@@ -69,7 +69,7 @@ export const LoginForm = ({ onModeChange }: LoginFormProps) => {
       } else {
         setAuthError(
           error.message ||
-            "Error de conexión. Verifique su red e intente nuevamente."
+            "Error de credenciales. Por favor verifique las credenciales enviadas."
         );
       }
     } finally {
